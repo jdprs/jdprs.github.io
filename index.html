@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="format-detection" content="telephone=no" />
-    <meta name="description" content="Windows 12 Web Version - 教师节特别版" />
+    <meta name="description" content=" " />
     <link rel="stylesheet" href="./base.css" />
     <base target="_blank" />
-    <title>教师节快乐</title>
+    <title> </title>
     <style>
-      /* ===== 原版基础样式 (保留) ===== */
+      /* ===== 重置 ===== */
       * {
         user-select: none;
         margin: 0;
@@ -33,7 +33,7 @@
         background: radial-gradient(ellipse at center, #1a0533 0%, #0d0d2b 60%, #000 100%);
       }
 
-      /* ===== 蓝屏容器 (原版结构) ===== */
+      /* ===== 蓝屏容器 ===== */
       #box {
         display: flex;
         flex-direction: column;
@@ -46,13 +46,15 @@
         transition: opacity 2.8s ease;
         pointer-events: auto;
         z-index: 2;
+        /* 关键：左对齐所有子项 */
+        align-items: flex-start;
       }
       #box.hidden {
         opacity: 0;
         pointer-events: none;
       }
 
-      /* ===== 表情 — 对齐 + 慢速动画 ===== */
+      /* ===== 表情 — 静态 “:(” 靠左 ===== */
       #happy-face {
         color: #fff;
         font-size: 150px;
@@ -62,88 +64,28 @@
         height: 150px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 18px;
-        position: relative;
+        justify-content: flex-start;  /* 靠左 */
+        gap: 0px;
         font-weight: 400;
+        width: 100%;  /* 占满父容器宽度，确保左对齐 */
       }
       #happy-face > * {
         display: inline-block;
-        position: relative;
-        line-height: 1;
         font-size: 150px;
         color: #fff;
-        /* 所有字符默认在水平基线上对齐 */
+        line-height: 1;
       }
 
-      /* 眼睛 (两个点) 和 嘴巴 (右括号) 各自独立浮动，但整体对齐 */
-      #happy-face .eye.a {
-        animation: floatEyeA 4.2s ease-in-out infinite;
-      }
-      #happy-face .eye.b {
-        animation: floatEyeB 4.2s ease-in-out infinite;
-      }
-      #happy-face .mouse {
-        animation: floatMouth 4.2s ease-in-out infinite;
-        transform-origin: center;
-      }
-
-      /* 慢速浮动 — 每个字符轻微上下 + 左右摆动，但始终保持在水平线上 */
-      @keyframes floatEyeA {
-        0%,
-        100% {
-          transform: translate(0, 0) scale(1);
-        }
-        25% {
-          transform: translate(-8px, -6px) scale(1.04);
-        }
-        50% {
-          transform: translate(0, 0) scale(1);
-        }
-        75% {
-          transform: translate(8px, -6px) scale(1.04);
-        }
-      }
-      @keyframes floatEyeB {
-        0%,
-        100% {
-          transform: translate(0, 0) scale(1);
-        }
-        25% {
-          transform: translate(8px, -6px) scale(1.04);
-        }
-        50% {
-          transform: translate(0, 0) scale(1);
-        }
-        75% {
-          transform: translate(-8px, -6px) scale(1.04);
-        }
-      }
-      @keyframes floatMouth {
-        0%,
-        100% {
-          transform: rotate(0deg) scale(1);
-        }
-        30% {
-          transform: rotate(6deg) scale(1.1);
-        }
-        60% {
-          transform: rotate(-4deg) scale(0.92);
-        }
-        80% {
-          transform: rotate(4deg) scale(1.06);
-        }
-      }
-
-      /* ===== 文字部分 (原版) ===== */
+      /* ===== 提示文字 ===== */
       #tx1 {
         color: #fff;
         font-size: 23px;
         margin-bottom: 5px;
-        margin-top: 50px;
+        margin-top: 40px;
         cursor: pointer;
         transition: opacity 0.3s;
-        text-align: center;
+        text-align: left;   /* 靠左 */
+        width: 100%;
       }
       #tx1:hover {
         opacity: 0.8;
@@ -162,16 +104,23 @@
         background: rgba(255, 255, 255, 0.08);
       }
 
+      /* ===== 进度条 ===== */
       #prog {
         color: #fff;
         font-size: 23px;
-        text-align: center;
+        text-align: left;
+        width: 100%;
+        margin-top: 6px;
       }
-      #dtx {
-        color: #fff;
-        margin-left: 20px;
-        font-size: 17px;
-        margin-top: 0;
+
+      /* ===== 底部二维码 + 说明文字 ===== */
+      #detail {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-top: 30px;
+        width: 100%;
+        justify-content: flex-start;  /* 左对齐 */
       }
       #qr {
         min-width: 150px;
@@ -181,11 +130,12 @@
         background-color: #fff;
         flex-shrink: 0;
       }
-      #detail {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        margin-top: 10px;
+      #dtx {
+        color: #fff;
+        font-size: 17px;
+        margin-top: 0;
+        text-align: left;
+        line-height: 1.5;
       }
       .link {
         color: #efefef;
@@ -196,8 +146,68 @@
       .link:hover {
         color: #aaa;
       }
+      #stopcode {
+        user-select: text;
+      }
 
-      /* ===== Canvas 礼炮层 ===== */
+      /* ===== 响应式 ===== */
+      @media (max-width: 768px) {
+        #box {
+          width: 88%;
+          left: 6%;
+        }
+        #happy-face {
+          font-size: 100px;
+          height: 100px;
+        }
+        #happy-face > * {
+          font-size: 100px;
+        }
+        #tx1 {
+          font-size: 18px;
+          margin-top: 30px;
+        }
+        #prog {
+          font-size: 18px;
+        }
+        #dtx {
+          font-size: 14px;
+        }
+        #qr {
+          width: 100px;
+          height: 100px;
+          min-width: 100px;
+        }
+        #detail {
+          gap: 12px;
+          flex-wrap: wrap;  /* 小屏换行 */
+        }
+      }
+      @media (max-width: 480px) {
+        #happy-face {
+          font-size: 70px;
+          height: 70px;
+        }
+        #happy-face > * {
+          font-size: 70px;
+        }
+        #tx1 {
+          font-size: 15px;
+        }
+        #prog {
+          font-size: 15px;
+        }
+        #dtx {
+          font-size: 12px;
+        }
+        #qr {
+          width: 70px;
+          height: 70px;
+          min-width: 70px;
+        }
+      }
+
+      /* ===== Canvas 礼炮 ===== */
       #confettiCanvas {
         position: fixed;
         top: 0;
@@ -272,78 +282,20 @@
       #greeting-sub.show {
         opacity: 1;
       }
-
-      /* ===== 响应式 (保留原版适配) ===== */
       @media (max-width: 768px) {
-        #box {
-          width: 88%;
-          left: 6%;
-        }
-        #happy-face {
-          font-size: 100px;
-          height: 100px;
-          gap: 12px;
-        }
-        #happy-face > * {
-          font-size: 100px;
-        }
-        #tx1 {
-          font-size: 18px;
-          margin-top: 30px;
-        }
-        #prog {
-          font-size: 18px;
-        }
-        #dtx {
-          font-size: 14px;
-          margin-left: 10px;
-        }
-        #qr {
-          width: 100px;
-          height: 100px;
-          min-width: 100px;
-        }
-        #detail {
-          gap: 12px;
-        }
         #greeting-sub {
           white-space: normal;
           padding: 0 20px;
         }
       }
-      @media (max-width: 480px) {
-        #happy-face {
-          font-size: 70px;
-          height: 70px;
-          gap: 8px;
-        }
-        #happy-face > * {
-          font-size: 70px;
-        }
-        #tx1 {
-          font-size: 15px;
-        }
-        #prog {
-          font-size: 15px;
-        }
-        #dtx {
-          font-size: 12px;
-        }
-        #qr {
-          width: 70px;
-          height: 70px;
-          min-width: 70px;
-        }
-      }
     </style>
   </head>
   <body>
-    <!-- ===== 蓝屏内容 (原版结构) ===== -->
+    <!-- ===== 蓝屏内容 ===== -->
     <div id="box">
       <div id="happy-face">
-        <span class="eye a">.</span>
-        <span class="eye b">.</span>
-        <span class="mouse">)</span>
+        <span>:</span>
+        <span>(</span>
       </div>
       <p id="tx1">
         你的设备遇到问题，需要重启。<br />
@@ -353,15 +305,7 @@
         <span id="complete">0</span> % 完成
       </p>
       <div id="detail">
-        <svg
-          id="qr"
-          xmlns="http://www.w3.org/2000/svg"
-          version="1.2"
-          baseProfile="tiny"
-          shape-rendering="crispEdges"
-          viewBox="20 15 305 305"
-          style="background-color: rgba(255, 255, 255, 1)"
-        >
+        <svg id="qr" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny" shape-rendering="crispEdges" viewBox="20 15 305 305" style="background-color: rgba(255,255,255,1)">
           <rect x="42" y="37" width="9" height="63" />
           <rect x="42" y="109" width="9" height="18" />
           <rect x="42" y="136" width="9" height="18" />
@@ -527,21 +471,18 @@
         <p id="dtx">
           有关此问题的详细信息和可能的解决方案，请访问
           <br />
-          <a
-            onclick="window.open('https://www.bilibili.com/video/BV1GJ411x7h7','_blank')"
-            class="link"
-          >
+          <a onclick="window.open('https://www.bilibili.com/video/BV1GJ411x7h7','_blank')" class="link">
             https://www.windows.com/stopcode
           </a>
           <br /><br />
           如果致电支持人员，请向他们提供以下信息：<br />
           终止代码：
-          <span id="stopcode" style="user-select: text">UNKNOWN_ERROR</span>
+          <span id="stopcode">UNKNOWN_ERROR</span>
         </p>
       </div>
     </div>
 
-    <!-- ===== Canvas 礼炮层 ===== -->
+    <!-- ===== Canvas 礼炮 ===== -->
     <canvas id="confettiCanvas"></canvas>
 
     <!-- ===== 祝福文字 ===== -->
@@ -551,7 +492,7 @@
     <script src="scripts/jq.min.js"></script>
     <script>
       // ============================================================
-      //  1. 读取保存的蓝屏颜色 (原版)
+      //  1. 读取保存的蓝屏颜色
       // ============================================================
       (function() {
         var color = localStorage.getItem('panic-color');
@@ -561,7 +502,7 @@
       })();
 
       // ============================================================
-      //  2. 蓝屏进度条 (原版逻辑，保留)
+      //  2. 蓝屏进度条
       // ============================================================
       var completeEl = document.getElementById('complete');
 
@@ -582,7 +523,6 @@
         else delay = delays[3];
 
         if (i >= 100) {
-          // 原版到达100%会重启，但我们用点击触发庆祝，所以这里什么都不做
           return;
         }
 
@@ -594,7 +534,7 @@
       next_loop();
 
       // ============================================================
-      //  3. 获取 URL 参数中的 code (原版)
+      //  3. 获取 URL 参数中的 code
       // ============================================================
       var r = window.location.search.substr(1).match(/(^|&)code=([^&]*)(&|$)/);
       if (r != null) {
@@ -614,7 +554,6 @@
           el.msRequestFullscreen();
         }
       }
-      // 页面加载后通过用户手势触发全屏
       document.addEventListener('click', function fullscreenOnClick() {
         requestFullscreen();
         document.removeEventListener('click', fullscreenOnClick);
@@ -649,7 +588,6 @@
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
-      // ----- 缤纷色彩 -----
       var COLORS = [
         '#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#0ABDE3',
         '#A29BFE', '#FD79A8', '#55EFC4', '#F8A5C2', '#74B9FF',
@@ -661,7 +599,6 @@
         return COLORS[Math.floor(Math.random() * COLORS.length)];
       }
 
-      // ----- 粒子 -----
       class Particle {
         constructor(x, y) {
           this.x = x;
@@ -803,36 +740,27 @@
         animFrameId = requestAnimationFrame(animate);
       }
 
-      // ============================================================
-      //  6. 触发庆祝
-      // ============================================================
       function startCelebration() {
         if (isCelebrating) return;
         isCelebrating = true;
 
-        // 确保全屏
         requestFullscreen();
 
-        // 蓝屏淡出
         box.classList.add('hidden');
         body.classList.add('celebrate');
         canvas.classList.add('active');
 
-        // 祝福文字出现 (延迟，与淡出配合)
         setTimeout(function() {
           greeting.classList.add('show');
           greetingSub.classList.add('show');
         }, 700);
 
-        // 礼炮爆发 (多波)
         setTimeout(function() { emitBurst(45); }, 200);
         setTimeout(function() { emitBurst(55); }, 600);
         setTimeout(function() { emitBurst(65); }, 1050);
 
-        // 启动动画
         animate();
 
-        // 持续礼炮
         var burstInterval = setInterval(function() {
           if (!isCelebrating) {
             clearInterval(burstInterval);
@@ -843,9 +771,6 @@
         window._burstInterval = burstInterval;
       }
 
-      // ============================================================
-      //  7. 绑定点击事件 (在 tx1 上)
-      // ============================================================
       tx1.addEventListener('click', function(e) {
         e.stopPropagation();
         if (!isCelebrating) {
@@ -859,16 +784,10 @@
         }
       });
 
-      // ============================================================
-      //  8. 窗口 resize 重置 Canvas
-      // ============================================================
       window.addEventListener('resize', function() {
         resizeCanvas();
       });
 
-      // ============================================================
-      //  9. 清理
-      // ============================================================
       window.addEventListener('beforeunload', function() {
         if (animFrameId) {
           cancelAnimationFrame(animFrameId);
