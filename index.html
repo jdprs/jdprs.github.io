@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="zh-CN" style="height: 100%; touch-action: auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="description" content="Windows 12 Web Version - 教师节特别版" />
+    <link rel="stylesheet" href="./base.css" />
+    <base target="_blank" />
+    <title>教师节快乐</title>
+    <style>
+      /* ===== 原版基础样式 (保留) ===== */
+      * {
+        user-select: none;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      }
+      body {
+        background-color: var(--panic-color, #136fca);
+        cursor: default;
+        transition: background-color 2.8s ease;
+      }
+      body.celebrate {
+        background: radial-gradient(ellipse at center, #1a0533 0%, #0d0d2b 60%, #000 100%);
+      }
+
+      /* ===== 蓝屏容器 (原版结构) ===== */
+      #box {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 70%;
+        left: 15%;
+        position: absolute;
+        height: 100%;
+        opacity: 1;
+        transition: opacity 2.8s ease;
+        pointer-events: auto;
+        z-index: 2;
+      }
+      #box.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* ===== 表情 — 对齐 + 慢速动画 ===== */
+      #happy-face {
+        color: #fff;
+        font-size: 150px;
+        margin: 0;
+        line-height: 1;
+        margin-top: -10px;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        position: relative;
+        font-weight: 400;
+      }
+      #happy-face > * {
+        display: inline-block;
+        position: relative;
+        line-height: 1;
+        font-size: 150px;
+        color: #fff;
+        /* 所有字符默认在水平基线上对齐 */
+      }
+
+      /* 眼睛 (两个点) 和 嘴巴 (右括号) 各自独立浮动，但整体对齐 */
+      #happy-face .eye.a {
+        animation: floatEyeA 4.2s ease-in-out infinite;
+      }
+      #happy-face .eye.b {
+        animation: floatEyeB 4.2s ease-in-out infinite;
+      }
+      #happy-face .mouse {
+        animation: floatMouth 4.2s ease-in-out infinite;
+        transform-origin: center;
+      }
+
+      /* 慢速浮动 — 每个字符轻微上下 + 左右摆动，但始终保持在水平线上 */
+      @keyframes floatEyeA {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(-8px, -6px) scale(1.04);
+        }
+        50% {
+          transform: translate(0, 0) scale(1);
+        }
+        75% {
+          transform: translate(8px, -6px) scale(1.04);
+        }
+      }
+      @keyframes floatEyeB {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(8px, -6px) scale(1.04);
+        }
+        50% {
+          transform: translate(0, 0) scale(1);
+        }
+        75% {
+          transform: translate(-8px, -6px) scale(1.04);
+        }
+      }
+      @keyframes floatMouth {
+        0%,
+        100% {
+          transform: rotate(0deg) scale(1);
+        }
+        30% {
+          transform: rotate(6deg) scale(1.1);
+        }
+        60% {
+          transform: rotate(-4deg) scale(0.92);
+        }
+        80% {
+          transform: rotate(4deg) scale(1.06);
+        }
+      }
+
+      /* ===== 文字部分 (原版) ===== */
+      #tx1 {
+        color: #fff;
+        font-size: 23px;
+        margin-bottom: 5px;
+        margin-top: 50px;
+        cursor: pointer;
+        transition: opacity 0.3s;
+        text-align: center;
+      }
+      #tx1:hover {
+        opacity: 0.8;
+      }
+      #tx1 .restart-link {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background 0.3s;
+      }
+      #tx1 .restart-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      #prog {
+        color: #fff;
+        font-size: 23px;
+        text-align: center;
+      }
+      #dtx {
+        color: #fff;
+        margin-left: 20px;
+        font-size: 17px;
+        margin-top: 0;
+      }
+      #qr {
+        min-width: 150px;
+        width: 150px;
+        height: 150px;
+        fill: var(--panic-color, #136fca);
+        background-color: #fff;
+        flex-shrink: 0;
+      }
+      #detail {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-top: 10px;
+      }
+      .link {
+        color: #efefef;
+        text-decoration: none;
+        transition: 100ms;
+        cursor: pointer;
+      }
+      .link:hover {
+        color: #aaa;
+      }
+
+      /* ===== Canvas 礼炮层 ===== */
+      #confettiCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 2.4s ease;
+      }
+      #confettiCanvas.active {
+        opacity: 1;
+        pointer-events: none;
+      }
+
+      /* ===== 祝福文字 ===== */
+      #greeting {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.5);
+        z-index: 3;
+        font-size: clamp(48px, 10vw, 120px);
+        font-weight: 900;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-shadow: 0 0 40px rgba(255, 200, 50, 0.35), 0 0 80px rgba(255, 150, 0, 0.2);
+        letter-spacing: 4px;
+        line-height: 1.3;
+        font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        background: linear-gradient(135deg, #ffd700 0%, #ff6b35 40%, #ff1493 70%, #ffd700 100%);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 4.5s ease-in-out infinite alternate;
+      }
+      #greeting.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        pointer-events: none;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      #greeting-sub {
+        position: fixed;
+        top: calc(50% + clamp(60px, 8vw, 100px));
+        left: 50%;
+        transform: translate(-50%, 0);
+        z-index: 3;
+        font-size: clamp(18px, 2.5vw, 36px);
+        color: rgba(255, 255, 255, 0.7);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 2.2s ease 1s;
+        letter-spacing: 8px;
+        font-weight: 300;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.12);
+        font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        white-space: nowrap;
+      }
+      #greeting-sub.show {
+        opacity: 1;
+      }
+
+      /* ===== 响应式 (保留原版适配) ===== */
+      @media (max-width: 768px) {
+        #box {
+          width: 88%;
+          left: 6%;
+        }
+        #happy-face {
+          font-size: 100px;
+          height: 100px;
+          gap: 12px;
+        }
+        #happy-face > * {
+          font-size: 100px;
+        }
+        #tx1 {
+          font-size: 18px;
+          margin-top: 30px;
+        }
+        #prog {
+          font-size: 18px;
+        }
+        #dtx {
+          font-size: 14px;
+          margin-left: 10px;
+        }
+        #qr {
+          width: 100px;
+          height: 100px;
+          min-width: 100px;
+        }
+        #detail {
+          gap: 12px;
+        }
+        #greeting-sub {
+          white-space: normal;
+          padding: 0 20px;
+        }
+      }
+      @media (max-width: 480px) {
+        #happy-face {
+          font-size: 70px;
+          height: 70px;
+          gap: 8px;
+        }
+        #happy-face > * {
+          font-size: 70px;
+        }
+        #tx1 {
+          font-size: 15px;
+        }
+        #prog {
+          font-size: 15px;
+        }
+        #dtx {
+          font-size: 12px;
+        }
+        #qr {
+          width: 70px;
+          height: 70px;
+          min-width: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== 蓝屏内容 (原版结构) ===== -->
+    <div id="box">
+      <div id="happy-face">
+        <span class="eye a">.</span>
+        <span class="eye b">.</span>
+        <span class="mouse">)</span>
+      </div>
+      <p id="tx1">
+        你的设备遇到问题，需要重启。<br />
+        <span class="restart-link">请点击此处重新启动</span>
+      </p>
+      <p id="prog">
+        <span id="complete">0</span> % 完成
+      </p>
+      <div id="detail">
+        <svg
+          id="qr"
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.2"
+          baseProfile="tiny"
+          shape-rendering="crispEdges"
+          viewBox="20 15 305 305"
+          style="background-color: rgba(255, 255, 255, 1)"
+        >
+          <rect x="42" y="37" width="9" height="63" />
+          <rect x="42" y="109" width="9" height="18" />
+          <rect x="42" y="136" width="9" height="18" />
+          <rect x="42" y="163" width="18" height="9" />
+          <rect x="42" y="181" width="9" height="18" />
+          <rect x="42" y="217" width="36" height="9" />
+          <rect x="42" y="235" width="9" height="63" />
+          <rect x="51" y="37" width="54" height="9" />
+          <rect x="51" y="91" width="54" height="9" />
+          <rect x="51" y="109" width="9" height="9" />
+          <rect x="51" y="145" width="9" height="9" />
+          <rect x="51" y="172" width="9" height="9" />
+          <rect x="51" y="235" width="54" height="9" />
+          <rect x="51" y="289" width="54" height="9" />
+          <rect x="60" y="55" width="27" height="27" />
+          <rect x="60" y="118" width="18" height="9" />
+          <rect x="60" y="136" width="9" height="9" />
+          <rect x="60" y="181" width="9" height="9" />
+          <rect x="60" y="199" width="9" height="9" />
+          <rect x="60" y="253" width="27" height="27" />
+          <rect x="69" y="127" width="72" height="9" />
+          <rect x="69" y="145" width="9" height="9" />
+          <rect x="69" y="190" width="9" height="9" />
+          <rect x="69" y="208" width="9" height="18" />
+          <rect x="78" y="109" width="27" height="9" />
+          <rect x="78" y="154" width="9" height="27" />
+          <rect x="78" y="208" width="9" height="9" />
+          <rect x="87" y="145" width="18" height="9" />
+          <rect x="87" y="190" width="9" height="18" />
+          <rect x="96" y="46" width="9" height="54" />
+          <rect x="96" y="163" width="9" height="9" />
+          <rect x="96" y="181" width="45" height="9" />
+          <rect x="96" y="199" width="9" height="9" />
+          <rect x="96" y="217" width="18" height="9" />
+          <rect x="96" y="244" width="9" height="54" />
+          <rect x="105" y="118" width="9" height="27" />
+          <rect x="105" y="154" width="18" height="9" />
+          <rect x="105" y="172" width="9" height="18" />
+          <rect x="105" y="208" width="9" height="18" />
+          <rect x="114" y="37" width="9" height="36" />
+          <rect x="114" y="82" width="9" height="18" />
+          <rect x="114" y="163" width="18" height="9" />
+          <rect x="114" y="190" width="9" height="18" />
+          <rect x="114" y="226" width="27" height="9" />
+          <rect x="114" y="244" width="9" height="18" />
+          <rect x="114" y="280" width="9" height="18" />
+          <rect x="123" y="55" width="9" height="36" />
+          <rect x="123" y="136" width="9" height="9" />
+          <rect x="123" y="190" width="9" height="9" />
+          <rect x="123" y="235" width="27" height="9" />
+          <rect x="123" y="253" width="18" height="18" />
+          <rect x="123" y="289" width="9" height="9" />
+          <rect x="132" y="64" width="9" height="54" />
+          <rect x="132" y="154" width="9" height="9" />
+          <rect x="132" y="199" width="9" height="9" />
+          <rect x="132" y="271" width="9" height="18" />
+          <rect x="141" y="46" width="27" height="9" />
+          <rect x="141" y="100" width="9" height="9" />
+          <rect x="141" y="145" width="9" height="9" />
+          <rect x="141" y="163" width="9" height="18" />
+          <rect x="141" y="217" width="36" height="9" />
+          <rect x="141" y="244" width="9" height="9" />
+          <rect x="141" y="262" width="9" height="18" />
+          <rect x="150" y="55" width="18" height="27" />
+          <rect x="150" y="91" width="9" height="9" />
+          <rect x="150" y="109" width="18" height="9" />
+          <rect x="150" y="136" width="9" height="9" />
+          <rect x="150" y="154" width="18" height="18" />
+          <rect x="150" y="181" width="27" height="9" />
+          <rect x="150" y="208" width="27" height="27" />
+          <rect x="150" y="271" width="45" height="9" />
+          <rect x="150" y="289" width="27" height="9" />
+          <rect x="159" y="37" width="9" height="45" />
+          <rect x="159" y="118" width="9" height="18" />
+          <rect x="159" y="145" width="9" height="27" />
+          <rect x="159" y="190" width="9" height="54" />
+          <rect x="159" y="262" width="9" height="36" />
+          <rect x="168" y="73" width="9" height="36" />
+          <rect x="168" y="118" width="27" height="9" />
+          <rect x="168" y="136" width="9" height="18" />
+          <rect x="168" y="172" width="9" height="18" />
+          <rect x="168" y="199" width="9" height="36" />
+          <rect x="168" y="244" width="9" height="9" />
+          <rect x="177" y="37" width="18" height="9" />
+          <rect x="177" y="55" width="9" height="18" />
+          <rect x="177" y="127" width="9" height="18" />
+          <rect x="177" y="154" width="9" height="27" />
+          <rect x="177" y="190" width="18" height="9" />
+          <rect x="177" y="226" width="18" height="9" />
+          <rect x="186" y="82" width="9" height="27" />
+          <rect x="186" y="163" width="9" height="9" />
+          <rect x="186" y="181" width="9" height="63" />
+          <rect x="186" y="253" width="9" height="27" />
+          <rect x="195" y="46" width="9" height="18" />
+          <rect x="195" y="82" width="9" height="9" />
+          <rect x="195" y="109" width="9" height="9" />
+          <rect x="195" y="181" width="9" height="9" />
+          <rect x="195" y="208" width="9" height="18" />
+          <rect x="195" y="280" width="9" height="9" />
+          <rect x="204" y="37" width="9" height="9" />
+          <rect x="204" y="91" width="9" height="9" />
+          <rect x="204" y="127" width="18" height="9" />
+          <rect x="204" y="199" width="9" height="18" />
+          <rect x="204" y="226" width="9" height="18" />
+          <rect x="204" y="253" width="9" height="9" />
+          <rect x="204" y="271" width="18" height="9" />
+          <rect x="213" y="55" width="9" height="9" />
+          <rect x="213" y="73" width="18" height="9" />
+          <rect x="213" y="100" width="9" height="90" />
+          <rect x="213" y="208" width="27" height="18" />
+          <rect x="213" y="262" width="9" height="18" />
+          <rect x="222" y="46" width="9" height="9" />
+          <rect x="222" y="64" width="9" height="54" />
+          <rect x="222" y="136" width="18" height="9" />
+          <rect x="222" y="154" width="9" height="9" />
+          <rect x="222" y="172" width="9" height="27" />
+          <rect x="222" y="226" width="9" height="36" />
+          <rect x="231" y="118" width="9" height="36" />
+          <rect x="231" y="172" width="9" height="9" />
+          <rect x="231" y="253" width="45" height="9" />
+          <rect x="240" y="37" width="9" height="63" />
+          <rect x="240" y="118" width="9" height="18" />
+          <rect x="240" y="145" width="9" height="27" />
+          <rect x="240" y="190" width="9" height="18" />
+          <rect x="240" y="217" width="27" height="9" />
+          <rect x="240" y="235" width="9" height="9" />
+          <rect x="240" y="262" width="9" height="36" />
+          <rect x="249" y="37" width="54" height="9" />
+          <rect x="249" y="91" width="54" height="9" />
+          <rect x="249" y="109" width="9" height="18" />
+          <rect x="249" y="145" width="9" height="18" />
+          <rect x="249" y="181" width="9" height="18" />
+          <rect x="249" y="262" width="9" height="9" />
+          <rect x="249" y="280" width="36" height="9" />
+          <rect x="258" y="55" width="27" height="27" />
+          <rect x="258" y="118" width="9" height="18" />
+          <rect x="258" y="154" width="9" height="18" />
+          <rect x="258" y="190" width="9" height="18" />
+          <rect x="258" y="226" width="9" height="36" />
+          <rect x="258" y="271" width="9" height="27" />
+          <rect x="267" y="109" width="36" height="9" />
+          <rect x="267" y="127" width="9" height="27" />
+          <rect x="267" y="163" width="27" height="9" />
+          <rect x="267" y="181" width="27" height="9" />
+          <rect x="267" y="199" width="27" height="9" />
+          <rect x="267" y="226" width="18" height="18" />
+          <rect x="267" y="262" width="27" height="9" />
+          <rect x="276" y="118" width="9" height="18" />
+          <rect x="276" y="145" width="9" height="27" />
+          <rect x="276" y="190" width="18" height="18" />
+          <rect x="276" y="244" width="18" height="9" />
+          <rect x="276" y="271" width="9" height="18" />
+          <rect x="285" y="145" width="9" height="9" />
+          <rect x="285" y="172" width="9" height="45" />
+          <rect x="285" y="271" width="18" height="9" />
+          <rect x="285" y="289" width="9" height="9" />
+          <rect x="294" y="46" width="9" height="54" />
+          <rect x="294" y="127" width="9" height="9" />
+          <rect x="294" y="190" width="9" height="9" />
+          <rect x="294" y="235" width="9" height="9" />
+          <rect x="294" y="253" width="9" height="9" />
+        </svg>
+        <p id="dtx">
+          有关此问题的详细信息和可能的解决方案，请访问
+          <br />
+          <a
+            onclick="window.open('https://www.bilibili.com/video/BV1GJ411x7h7','_blank')"
+            class="link"
+          >
+            https://www.windows.com/stopcode
+          </a>
+          <br /><br />
+          如果致电支持人员，请向他们提供以下信息：<br />
+          终止代码：
+          <span id="stopcode" style="user-select: text">UNKNOWN_ERROR</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- ===== Canvas 礼炮层 ===== -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- ===== 祝福文字 ===== -->
+    <div id="greeting">教师节快乐！</div>
+    <div id="greeting-sub">— 桃李满天下 · 春晖遍四方 —</div>
+
+    <script src="scripts/jq.min.js"></script>
+    <script>
+      // ============================================================
+      //  1. 读取保存的蓝屏颜色 (原版)
+      // ============================================================
+      (function() {
+        var color = localStorage.getItem('panic-color');
+        if (color) {
+          document.documentElement.style.setProperty('--panic-color', color);
+        }
+      })();
+
+      // ============================================================
+      //  2. 蓝屏进度条 (原版逻辑，保留)
+      // ============================================================
+      var completeEl = document.getElementById('complete');
+
+      function update_complete() {
+        var val = parseInt(completeEl.innerText, 10);
+        if (isNaN(val)) val = 0;
+        completeEl.innerText = val + 1;
+      }
+
+      function next_loop() {
+        var i = parseInt(completeEl.innerText, 10);
+        if (isNaN(i)) i = 0;
+        var delays = [300, 200, 100, 50];
+        var delay;
+        if (i < 20) delay = delays[0];
+        else if (i < 60) delay = delays[1];
+        else if (i < 80) delay = delays[2];
+        else delay = delays[3];
+
+        if (i >= 100) {
+          // 原版到达100%会重启，但我们用点击触发庆祝，所以这里什么都不做
+          return;
+        }
+
+        setTimeout(function() {
+          update_complete();
+          next_loop();
+        }, delay);
+      }
+      next_loop();
+
+      // ============================================================
+      //  3. 获取 URL 参数中的 code (原版)
+      // ============================================================
+      var r = window.location.search.substr(1).match(/(^|&)code=([^&]*)(&|$)/);
+      if (r != null) {
+        document.getElementById('stopcode').innerHTML = r[2];
+      }
+
+      // ============================================================
+      //  4. 全屏功能 (默认全屏)
+      // ============================================================
+      function requestFullscreen() {
+        var el = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen().catch(function() {});
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+        }
+      }
+      // 页面加载后通过用户手势触发全屏
+      document.addEventListener('click', function fullscreenOnClick() {
+        requestFullscreen();
+        document.removeEventListener('click', fullscreenOnClick);
+      }, { once: true });
+      document.addEventListener('touchstart', function fullscreenOnTouch() {
+        requestFullscreen();
+        document.removeEventListener('touchstart', fullscreenOnTouch);
+      }, { once: true });
+
+      // ============================================================
+      //  5. 点击 "请点击此处重新启动" → 庆祝模式
+      // ============================================================
+      var box = document.getElementById('box');
+      var tx1 = document.getElementById('tx1');
+      var canvas = document.getElementById('confettiCanvas');
+      var ctx = canvas.getContext('2d');
+      var greeting = document.getElementById('greeting');
+      var greetingSub = document.getElementById('greeting-sub');
+      var body = document.body;
+
+      var isCelebrating = false;
+      var particles = [];
+      var animFrameId = null;
+      var W, H;
+
+      function resizeCanvas() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // ----- 缤纷色彩 -----
+      var COLORS = [
+        '#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#0ABDE3',
+        '#A29BFE', '#FD79A8', '#55EFC4', '#F8A5C2', '#74B9FF',
+        '#FFD93D', '#FF8A5C', '#A8E6CF', '#FFB3B3', '#B8A9C9',
+        '#FFC8A2', '#FF4757', '#2ED573', '#1E90FF', '#FF6348'
+      ];
+
+      function randomColor() {
+        return COLORS[Math.floor(Math.random() * COLORS.length)];
+      }
+
+      // ----- 粒子 -----
+      class Particle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          var angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.4;
+          var speed = 2.5 + Math.random() * 9;
+          this.vx = Math.cos(angle) * speed * (0.5 + Math.random() * 0.9);
+          this.vy = Math.sin(angle) * speed * (0.7 + Math.random() * 0.7);
+          this.gravity = 0.05 + Math.random() * 0.05;
+          this.drag = 0.99;
+          this.color = randomColor();
+          this.size = 3 + Math.random() * 9;
+          this.life = 1.0;
+          this.decay = 0.003 + Math.random() * 0.007;
+          this.rotation = Math.random() * Math.PI * 2;
+          this.rotSpeed = (Math.random() - 0.5) * 0.12;
+          this.type = Math.random() < 0.4 ? 'ribbon' : 'circle';
+          this.ribbonW = 3 + Math.random() * 7;
+          this.ribbonH = 10 + Math.random() * 22;
+          this.twinkle = Math.random() < 0.35;
+          this.twinkleSpeed = 0.04 + Math.random() * 0.08;
+          this.twinklePhase = Math.random() * Math.PI * 2;
+        }
+
+        update() {
+          this.vx *= this.drag;
+          this.vy *= this.drag;
+          this.vy += this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.rotation += this.rotSpeed;
+          this.life -= this.decay;
+          if (this.twinkle) {
+            this.twinklePhase += this.twinkleSpeed;
+          }
+          return this.life > 0;
+        }
+
+        draw(ctx) {
+          var alpha = Math.max(0, this.life);
+          var sizeScale = 0.5 + 0.5 * this.life;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          var twinkleFactor = 1;
+          if (this.twinkle) {
+            twinkleFactor = 0.6 + 0.4 * Math.sin(this.twinklePhase);
+          }
+
+          if (this.type === 'ribbon') {
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            var w = this.ribbonW * sizeScale * twinkleFactor;
+            var h = this.ribbonH * sizeScale * twinkleFactor;
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 10;
+            var r = w * 0.4;
+            ctx.beginPath();
+            ctx.moveTo(-w / 2 + r, -h / 2);
+            ctx.lineTo(w / 2 - r, -h / 2);
+            ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+            ctx.lineTo(w / 2, h / 2 - r);
+            ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+            ctx.lineTo(-w / 2 + r, h / 2);
+            ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+            ctx.lineTo(-w / 2, -h / 2 + r);
+            ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+            ctx.closePath();
+            ctx.fill();
+          } else {
+            var radius = this.size * sizeScale * twinkleFactor;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 18;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            if (radius > 2.5) {
+              ctx.shadowBlur = 0;
+              ctx.globalAlpha = alpha * 0.5;
+              ctx.beginPath();
+              ctx.arc(this.x - radius * 0.2, this.y - radius * 0.2, radius * 0.3, 0, Math.PI * 2);
+              ctx.fillStyle = '#fff';
+              ctx.fill();
+            }
+          }
+          ctx.restore();
+        }
+      }
+
+      function emitBurst(count) {
+        var sources = 5 + Math.floor(Math.random() * 3);
+        for (var s = 0; s < sources; s++) {
+          var baseX = (s + 0.5) / sources * W;
+          var x = baseX + (Math.random() - 0.5) * 100;
+          var y = H + 5 + Math.random() * 25;
+          for (var i = 0; i < count / sources; i++) {
+            var p = new Particle(x, y);
+            p.color = randomColor();
+            p.vx += (Math.random() - 0.5) * 3;
+            p.vy -= Math.random() * 2.5;
+            particles.push(p);
+          }
+        }
+      }
+
+      function emitContinuous() {
+        var count = 2 + Math.floor(Math.random() * 5);
+        for (var i = 0; i < count; i++) {
+          var x = Math.random() * W;
+          var y = H + 5 + Math.random() * 18;
+          var p = new Particle(x, y);
+          p.vx = (Math.random() - 0.5) * 7;
+          p.vy = -3 - Math.random() * 11;
+          p.color = randomColor();
+          if (Math.random() < 0.2) {
+            p.size *= 1.7;
+          }
+          particles.push(p);
+        }
+      }
+
+      function animate() {
+        if (!isCelebrating) return;
+        for (var i = particles.length - 1; i >= 0; i--) {
+          var alive = particles[i].update();
+          if (!alive) {
+            particles.splice(i, 1);
+          }
+        }
+        emitContinuous();
+        ctx.clearRect(0, 0, W, H);
+        for (var i = 0; i < particles.length; i++) {
+          particles[i].draw(ctx);
+        }
+        if (particles.length > 700) {
+          particles.splice(0, particles.length - 700);
+        }
+        animFrameId = requestAnimationFrame(animate);
+      }
+
+      // ============================================================
+      //  6. 触发庆祝
+      // ============================================================
+      function startCelebration() {
+        if (isCelebrating) return;
+        isCelebrating = true;
+
+        // 确保全屏
+        requestFullscreen();
+
+        // 蓝屏淡出
+        box.classList.add('hidden');
+        body.classList.add('celebrate');
+        canvas.classList.add('active');
+
+        // 祝福文字出现 (延迟，与淡出配合)
+        setTimeout(function() {
+          greeting.classList.add('show');
+          greetingSub.classList.add('show');
+        }, 700);
+
+        // 礼炮爆发 (多波)
+        setTimeout(function() { emitBurst(45); }, 200);
+        setTimeout(function() { emitBurst(55); }, 600);
+        setTimeout(function() { emitBurst(65); }, 1050);
+
+        // 启动动画
+        animate();
+
+        // 持续礼炮
+        var burstInterval = setInterval(function() {
+          if (!isCelebrating) {
+            clearInterval(burstInterval);
+            return;
+          }
+          emitBurst(30 + Math.random() * 35);
+        }, 2200);
+        window._burstInterval = burstInterval;
+      }
+
+      // ============================================================
+      //  7. 绑定点击事件 (在 tx1 上)
+      // ============================================================
+      tx1.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!isCelebrating) {
+          startCelebration();
+        }
+      });
+      tx1.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        if (!isCelebrating) {
+          startCelebration();
+        }
+      });
+
+      // ============================================================
+      //  8. 窗口 resize 重置 Canvas
+      // ============================================================
+      window.addEventListener('resize', function() {
+        resizeCanvas();
+      });
+
+      // ============================================================
+      //  9. 清理
+      // ============================================================
+      window.addEventListener('beforeunload', function() {
+        if (animFrameId) {
+          cancelAnimationFrame(animFrameId);
+        }
+        if (window._burstInterval) {
+          clearInterval(window._burstInterval);
+        }
+      });
+
+      console.log('🎉 教师节快乐！点击 "请点击此处重新启动" 触发礼炮彩带！');
+    </script>
+  </body>
+</html>
