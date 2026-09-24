@@ -1,803 +1,425 @@
-<!doctype html>
-<html lang="zh-CN" style="height: 100%; touch-action: auto">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="description" content=" " />
-    <link rel="stylesheet" href="./base.css" />
-    <base target="_blank" />
-    <title> </title>
-    <style>
-      /* ===== 重置 ===== */
-      * {
-        user-select: none;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-      }
-      body {
-        background-color: var(--panic-color, #136fca);
-        cursor: default;
-        transition: background-color 2.8s ease;
-      }
-      body.celebrate {
-        background: radial-gradient(ellipse at center, #1a0533 0%, #0d0d2b 60%, #000 100%);
-      }
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>声音检测器</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #171a23;
+    --line: #262b38;
+    --text: #e6e9ef;
+    --muted: #8b93a7;
+    --accent: #38e08a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(1100px 600px at 50% -10%, #1c2231, #0f1117 60%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 28px 16px 48px;
+  }
+  .app { width: 100%; max-width: 780px; }
 
-      /* ===== 蓝屏容器 ===== */
-      #box {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 70%;
-        left: 15%;
-        position: absolute;
-        height: 100%;
-        opacity: 1;
-        transition: opacity 2.8s ease;
-        pointer-events: auto;
-        z-index: 2;
-        /* 关键：左对齐所有子项 */
-        align-items: flex-start;
-      }
-      #box.hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: .5px;
+  }
+  .sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
 
-      /* ===== 表情 — 静态 “:(” 靠左 ===== */
-      #happy-face {
-        color: #fff;
-        font-size: 150px;
-        margin: 0;
-        line-height: 1;
-        margin-top: -10px;
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;  /* 靠左 */
-        gap: 0px;
-        font-weight: 400;
-        width: 100%;  /* 占满父容器宽度，确保左对齐 */
-      }
-      #happy-face > * {
-        display: inline-block;
-        font-size: 150px;
-        color: #fff;
-        line-height: 1;
-      }
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  button {
+    border: 1px solid var(--line);
+    background: #1e2330;
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: .15s;
+  }
+  button:hover:not(:disabled) { background: #262d3d; border-color: #384054; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primary {
+    background: linear-gradient(180deg, #2fd07c, #22b76a);
+    border-color: transparent;
+    color: #06210f;
+    font-weight: 600;
+  }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); }
+  #status { font-size: 13px; color: var(--muted); }
 
-      /* ===== 提示文字 ===== */
-      #tx1 {
-        color: #fff;
-        font-size: 23px;
-        margin-bottom: 5px;
-        margin-top: 40px;
-        cursor: pointer;
-        transition: opacity 0.3s;
-        text-align: left;   /* 靠左 */
-        width: 100%;
-      }
-      #tx1:hover {
-        opacity: 0.8;
-      }
-      #tx1 .restart-link {
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 6px;
-        transition: background 0.3s;
-      }
-      #tx1 .restart-link:hover {
-        background: rgba(255, 255, 255, 0.08);
-      }
+  .meters {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .meter {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .meter .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+  .meter .value {
+    font-size: 30px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .meter .value small {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-left: 3px;
+  }
+  .meter .extra {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
 
-      /* ===== 进度条 ===== */
-      #prog {
-        color: #fff;
-        font-size: 23px;
-        text-align: left;
-        width: 100%;
-        margin-top: 6px;
-      }
+  .wave-box {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 170px;
+    border-radius: 8px;
+  }
 
-      /* ===== 底部二维码 + 说明文字 ===== */
-      #detail {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        margin-top: 30px;
-        width: 100%;
-        justify-content: flex-start;  /* 左对齐 */
-      }
-      #qr {
-        min-width: 150px;
-        width: 150px;
-        height: 150px;
-        fill: var(--panic-color, #136fca);
-        background-color: #fff;
-        flex-shrink: 0;
-      }
-      #dtx {
-        color: #fff;
-        font-size: 17px;
-        margin-top: 0;
-        text-align: left;
-        line-height: 1.5;
-      }
-      .link {
-        color: #efefef;
-        text-decoration: none;
-        transition: 100ms;
-        cursor: pointer;
-      }
-      .link:hover {
-        color: #aaa;
-      }
-      #stopcode {
-        user-select: text;
-      }
+  .bar-wrap {
+    height: 12px;
+    border-radius: 8px;
+    background: #1b202b;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  #levelFill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width .06s linear, background .2s linear;
+  }
+  .scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
 
-      /* ===== 响应式 ===== */
-      @media (max-width: 768px) {
-        #box {
-          width: 88%;
-          left: 6%;
-        }
-        #happy-face {
-          font-size: 100px;
-          height: 100px;
-        }
-        #happy-face > * {
-          font-size: 100px;
-        }
-        #tx1 {
-          font-size: 18px;
-          margin-top: 30px;
-        }
-        #prog {
-          font-size: 18px;
-        }
-        #dtx {
-          font-size: 14px;
-        }
-        #qr {
-          width: 100px;
-          height: 100px;
-          min-width: 100px;
-        }
-        #detail {
-          gap: 12px;
-          flex-wrap: wrap;  /* 小屏换行 */
-        }
-      }
-      @media (max-width: 480px) {
-        #happy-face {
-          font-size: 70px;
-          height: 70px;
-        }
-        #happy-face > * {
-          font-size: 70px;
-        }
-        #tx1 {
-          font-size: 15px;
-        }
-        #prog {
-          font-size: 15px;
-        }
-        #dtx {
-          font-size: 12px;
-        }
-        #qr {
-          width: 70px;
-          height: 70px;
-          min-width: 70px;
-        }
-      }
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  @media (max-width: 560px) {
+    .meters { grid-template-columns: 1fr; }
+    .meter .value { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>🎤 声音检测器</h1>
+  <div class="sub">实时波形 · 当前分贝 · 最近 10 秒平均分贝</div>
 
-      /* ===== Canvas 礼炮 ===== */
-      #confettiCanvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 2.4s ease;
-      }
-      #confettiCanvas.active {
-        opacity: 1;
-        pointer-events: none;
-      }
+  <div class="controls">
+    <button id="startBtn" class="primary">开始检测</button>
+    <button id="stopBtn" disabled>停止</button>
+    <span id="status">等待开始…</span>
+  </div>
 
-      /* ===== 祝福文字 ===== */
-      #greeting {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0.5);
-        z-index: 3;
-        font-size: clamp(48px, 10vw, 120px);
-        font-weight: 900;
-        text-align: center;
-        opacity: 0;
-        pointer-events: none;
-        transition: all 2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        text-shadow: 0 0 40px rgba(255, 200, 50, 0.35), 0 0 80px rgba(255, 150, 0, 0.2);
-        letter-spacing: 4px;
-        line-height: 1.3;
-        font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-        background: linear-gradient(135deg, #ffd700 0%, #ff6b35 40%, #ff1493 70%, #ffd700 100%);
-        background-size: 300% 300%;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: shimmer 4.5s ease-in-out infinite alternate;
-      }
-      #greeting.show {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-        pointer-events: none;
-      }
-      @keyframes shimmer {
-        0% {
-          background-position: 0% 50%;
-        }
-        100% {
-          background-position: 100% 50%;
-        }
-      }
-
-      #greeting-sub {
-        position: fixed;
-        top: calc(50% + clamp(60px, 8vw, 100px));
-        left: 50%;
-        transform: translate(-50%, 0);
-        z-index: 3;
-        font-size: clamp(18px, 2.5vw, 36px);
-        color: rgba(255, 255, 255, 0.7);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 2.2s ease 1s;
-        letter-spacing: 8px;
-        font-weight: 300;
-        text-shadow: 0 0 30px rgba(255, 255, 255, 0.12);
-        font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-        white-space: nowrap;
-      }
-      #greeting-sub.show {
-        opacity: 1;
-      }
-      @media (max-width: 768px) {
-        #greeting-sub {
-          white-space: normal;
-          padding: 0 20px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <!-- ===== 蓝屏内容 ===== -->
-    <div id="box">
-      <div id="happy-face">
-        <span>:</span>
-        <span>(</span>
-      </div>
-      <p id="tx1">
-        你的设备遇到问题，需要重启。<br />
-        <span class="restart-link">请点击此处重新启动</span>
-      </p>
-      <p id="prog">
-        <span id="complete">0</span> % 完成
-      </p>
-      <div id="detail">
-        <svg id="qr" xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny" shape-rendering="crispEdges" viewBox="20 15 305 305" style="background-color: rgba(255,255,255,1)">
-          <rect x="42" y="37" width="9" height="63" />
-          <rect x="42" y="109" width="9" height="18" />
-          <rect x="42" y="136" width="9" height="18" />
-          <rect x="42" y="163" width="18" height="9" />
-          <rect x="42" y="181" width="9" height="18" />
-          <rect x="42" y="217" width="36" height="9" />
-          <rect x="42" y="235" width="9" height="63" />
-          <rect x="51" y="37" width="54" height="9" />
-          <rect x="51" y="91" width="54" height="9" />
-          <rect x="51" y="109" width="9" height="9" />
-          <rect x="51" y="145" width="9" height="9" />
-          <rect x="51" y="172" width="9" height="9" />
-          <rect x="51" y="235" width="54" height="9" />
-          <rect x="51" y="289" width="54" height="9" />
-          <rect x="60" y="55" width="27" height="27" />
-          <rect x="60" y="118" width="18" height="9" />
-          <rect x="60" y="136" width="9" height="9" />
-          <rect x="60" y="181" width="9" height="9" />
-          <rect x="60" y="199" width="9" height="9" />
-          <rect x="60" y="253" width="27" height="27" />
-          <rect x="69" y="127" width="72" height="9" />
-          <rect x="69" y="145" width="9" height="9" />
-          <rect x="69" y="190" width="9" height="9" />
-          <rect x="69" y="208" width="9" height="18" />
-          <rect x="78" y="109" width="27" height="9" />
-          <rect x="78" y="154" width="9" height="27" />
-          <rect x="78" y="208" width="9" height="9" />
-          <rect x="87" y="145" width="18" height="9" />
-          <rect x="87" y="190" width="9" height="18" />
-          <rect x="96" y="46" width="9" height="54" />
-          <rect x="96" y="163" width="9" height="9" />
-          <rect x="96" y="181" width="45" height="9" />
-          <rect x="96" y="199" width="9" height="9" />
-          <rect x="96" y="217" width="18" height="9" />
-          <rect x="96" y="244" width="9" height="54" />
-          <rect x="105" y="118" width="9" height="27" />
-          <rect x="105" y="154" width="18" height="9" />
-          <rect x="105" y="172" width="9" height="18" />
-          <rect x="105" y="208" width="9" height="18" />
-          <rect x="114" y="37" width="9" height="36" />
-          <rect x="114" y="82" width="9" height="18" />
-          <rect x="114" y="163" width="18" height="9" />
-          <rect x="114" y="190" width="9" height="18" />
-          <rect x="114" y="226" width="27" height="9" />
-          <rect x="114" y="244" width="9" height="18" />
-          <rect x="114" y="280" width="9" height="18" />
-          <rect x="123" y="55" width="9" height="36" />
-          <rect x="123" y="136" width="9" height="9" />
-          <rect x="123" y="190" width="9" height="9" />
-          <rect x="123" y="235" width="27" height="9" />
-          <rect x="123" y="253" width="18" height="18" />
-          <rect x="123" y="289" width="9" height="9" />
-          <rect x="132" y="64" width="9" height="54" />
-          <rect x="132" y="154" width="9" height="9" />
-          <rect x="132" y="199" width="9" height="9" />
-          <rect x="132" y="271" width="9" height="18" />
-          <rect x="141" y="46" width="27" height="9" />
-          <rect x="141" y="100" width="9" height="9" />
-          <rect x="141" y="145" width="9" height="9" />
-          <rect x="141" y="163" width="9" height="18" />
-          <rect x="141" y="217" width="36" height="9" />
-          <rect x="141" y="244" width="9" height="9" />
-          <rect x="141" y="262" width="9" height="18" />
-          <rect x="150" y="55" width="18" height="27" />
-          <rect x="150" y="91" width="9" height="9" />
-          <rect x="150" y="109" width="18" height="9" />
-          <rect x="150" y="136" width="9" height="9" />
-          <rect x="150" y="154" width="18" height="18" />
-          <rect x="150" y="181" width="27" height="9" />
-          <rect x="150" y="208" width="27" height="27" />
-          <rect x="150" y="271" width="45" height="9" />
-          <rect x="150" y="289" width="27" height="9" />
-          <rect x="159" y="37" width="9" height="45" />
-          <rect x="159" y="118" width="9" height="18" />
-          <rect x="159" y="145" width="9" height="27" />
-          <rect x="159" y="190" width="9" height="54" />
-          <rect x="159" y="262" width="9" height="36" />
-          <rect x="168" y="73" width="9" height="36" />
-          <rect x="168" y="118" width="27" height="9" />
-          <rect x="168" y="136" width="9" height="18" />
-          <rect x="168" y="172" width="9" height="18" />
-          <rect x="168" y="199" width="9" height="36" />
-          <rect x="168" y="244" width="9" height="9" />
-          <rect x="177" y="37" width="18" height="9" />
-          <rect x="177" y="55" width="9" height="18" />
-          <rect x="177" y="127" width="9" height="18" />
-          <rect x="177" y="154" width="9" height="27" />
-          <rect x="177" y="190" width="18" height="9" />
-          <rect x="177" y="226" width="18" height="9" />
-          <rect x="186" y="82" width="9" height="27" />
-          <rect x="186" y="163" width="9" height="9" />
-          <rect x="186" y="181" width="9" height="63" />
-          <rect x="186" y="253" width="9" height="27" />
-          <rect x="195" y="46" width="9" height="18" />
-          <rect x="195" y="82" width="9" height="9" />
-          <rect x="195" y="109" width="9" height="9" />
-          <rect x="195" y="181" width="9" height="9" />
-          <rect x="195" y="208" width="9" height="18" />
-          <rect x="195" y="280" width="9" height="9" />
-          <rect x="204" y="37" width="9" height="9" />
-          <rect x="204" y="91" width="9" height="9" />
-          <rect x="204" y="127" width="18" height="9" />
-          <rect x="204" y="199" width="9" height="18" />
-          <rect x="204" y="226" width="9" height="18" />
-          <rect x="204" y="253" width="9" height="9" />
-          <rect x="204" y="271" width="18" height="9" />
-          <rect x="213" y="55" width="9" height="9" />
-          <rect x="213" y="73" width="18" height="9" />
-          <rect x="213" y="100" width="9" height="90" />
-          <rect x="213" y="208" width="27" height="18" />
-          <rect x="213" y="262" width="9" height="18" />
-          <rect x="222" y="46" width="9" height="9" />
-          <rect x="222" y="64" width="9" height="54" />
-          <rect x="222" y="136" width="18" height="9" />
-          <rect x="222" y="154" width="9" height="9" />
-          <rect x="222" y="172" width="9" height="27" />
-          <rect x="222" y="226" width="9" height="36" />
-          <rect x="231" y="118" width="9" height="36" />
-          <rect x="231" y="172" width="9" height="9" />
-          <rect x="231" y="253" width="45" height="9" />
-          <rect x="240" y="37" width="9" height="63" />
-          <rect x="240" y="118" width="9" height="18" />
-          <rect x="240" y="145" width="9" height="27" />
-          <rect x="240" y="190" width="9" height="18" />
-          <rect x="240" y="217" width="27" height="9" />
-          <rect x="240" y="235" width="9" height="9" />
-          <rect x="240" y="262" width="9" height="36" />
-          <rect x="249" y="37" width="54" height="9" />
-          <rect x="249" y="91" width="54" height="9" />
-          <rect x="249" y="109" width="9" height="18" />
-          <rect x="249" y="145" width="9" height="18" />
-          <rect x="249" y="181" width="9" height="18" />
-          <rect x="249" y="262" width="9" height="9" />
-          <rect x="249" y="280" width="36" height="9" />
-          <rect x="258" y="55" width="27" height="27" />
-          <rect x="258" y="118" width="9" height="18" />
-          <rect x="258" y="154" width="9" height="18" />
-          <rect x="258" y="190" width="9" height="18" />
-          <rect x="258" y="226" width="9" height="36" />
-          <rect x="258" y="271" width="9" height="27" />
-          <rect x="267" y="109" width="36" height="9" />
-          <rect x="267" y="127" width="9" height="27" />
-          <rect x="267" y="163" width="27" height="9" />
-          <rect x="267" y="181" width="27" height="9" />
-          <rect x="267" y="199" width="27" height="9" />
-          <rect x="267" y="226" width="18" height="18" />
-          <rect x="267" y="262" width="27" height="9" />
-          <rect x="276" y="118" width="9" height="18" />
-          <rect x="276" y="145" width="9" height="27" />
-          <rect x="276" y="190" width="18" height="18" />
-          <rect x="276" y="244" width="18" height="9" />
-          <rect x="276" y="271" width="9" height="18" />
-          <rect x="285" y="145" width="9" height="9" />
-          <rect x="285" y="172" width="9" height="45" />
-          <rect x="285" y="271" width="18" height="9" />
-          <rect x="285" y="289" width="9" height="9" />
-          <rect x="294" y="46" width="9" height="54" />
-          <rect x="294" y="127" width="9" height="9" />
-          <rect x="294" y="190" width="9" height="9" />
-          <rect x="294" y="235" width="9" height="9" />
-          <rect x="294" y="253" width="9" height="9" />
-        </svg>
-        <p id="dtx">
-          有关此问题的详细信息和可能的解决方案，请访问
-          <br />
-          <a onclick="window.open('https://www.bilibili.com/video/BV1GJ411x7h7','_blank')" class="link">
-            https://www.windows.com/stopcode
-          </a>
-          <br /><br />
-          如果致电支持人员，请向他们提供以下信息：<br />
-          终止代码：
-          <span id="stopcode">UNKNOWN_ERROR</span>
-        </p>
-      </div>
+  <div class="meters">
+    <div class="meter">
+      <div class="label">当前分贝</div>
+      <div class="value"><span id="currentDb">--</span><small>dB</small></div>
+      <div class="extra" id="dbfs">原始：-- dBFS</div>
     </div>
+    <div class="meter">
+      <div class="label">最近 10 秒平均</div>
+      <div class="value"><span id="avgDb">--</span><small>dB</small></div>
+      <div class="extra">滑动窗口 · 能量平均</div>
+    </div>
+    <div class="meter">
+      <div class="label">10 秒内峰值</div>
+      <div class="value"><span id="peakDb">--</span><small>dB</small></div>
+      <div class="extra">窗口内最大值</div>
+    </div>
+  </div>
 
-    <!-- ===== Canvas 礼炮 ===== -->
-    <canvas id="confettiCanvas"></canvas>
+  <div class="wave-box">
+    <canvas id="wave"></canvas>
+  </div>
 
-    <!-- ===== 祝福文字 ===== -->
-    <div id="greeting">教师节快乐！</div>
-    <div id="greeting-sub">—四指从右向左滑退出—</div>
+  <div class="bar-wrap"><div id="levelFill"></div></div>
+  <div class="scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
 
-    <script src="scripts/jq.min.js"></script>
-    <script>
-      // ============================================================
-      //  1. 读取保存的蓝屏颜色
-      // ============================================================
-      (function() {
-        var color = localStorage.getItem('panic-color');
-        if (color) {
-          document.documentElement.style.setProperty('--panic-color', color);
-        }
-      })();
+  <div class="note">
+    分贝为相对值（0–100 刻度），由麦克风采样计算得出，未做专业声压级校准。<br>
+    如需接近真实 dB SPL，可调整代码中的 <code>CAL_OFFSET</code>（默认 100）。
+  </div>
+</div>
 
-      // ============================================================
-      //  2. 蓝屏进度条
-      // ============================================================
-      var completeEl = document.getElementById('complete');
+<script>
+(() => {
+  'use strict';
 
-      function update_complete() {
-        var val = parseInt(completeEl.innerText, 10);
-        if (isNaN(val)) val = 0;
-        completeEl.innerText = val + 1;
+  // ======== 可调参数 ========
+  const CAL_OFFSET = 100;    // dBFS -> 相对分贝的偏移量（校准用）
+  const WINDOW_MS  = 10000;  // 统计窗口：10 秒
+  const FFT_SIZE   = 2048;   // 时域采样点数
+  // =========================
+
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn  = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+  const curEl    = document.getElementById('currentDb');
+  const avgEl    = document.getElementById('avgDb');
+  const peakEl   = document.getElementById('peakDb');
+  const dbfsEl   = document.getElementById('dbfs');
+  const canvas   = document.getElementById('wave');
+  const levelFill = document.getElementById('levelFill');
+
+  let audioCtx = null;
+  let analyser = null;
+  let stream = null;
+  let sourceNode = null;
+  let timeData = null;
+
+  let running = false;
+  let rafId = 0;
+  let smoothLevel = 0;
+
+  /** 滑动窗口样本：{ t: 时间戳, power: rms^2, level: 分贝 } */
+  let samples = [];
+
+  const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+  /** 根据分贝值取颜色：低=绿，高=红 */
+  function colorFor(level) {
+    const hue = 140 - clamp(level, 0, 100) * 1.4; // 140(绿) -> 0(红)
+    return `hsl(${hue}, 85%, 58%)`;
+  }
+
+  /** 适配高分屏 */
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = Math.max(1, Math.round(rect.width  * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  /** 绘制波形 */
+  function drawWave() {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (!w || !h) return;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 中线
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2 + 0.5);
+    ctx.lineTo(w, h / 2 + 0.5);
+    ctx.stroke();
+
+    if (!timeData) return;
+
+    const n = timeData.length;
+    const amp = (h / 2) * 0.92;
+
+    ctx.strokeStyle = colorFor(smoothLevel);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let x = 0; x < w; x++) {
+      const i0 = Math.floor((x * n) / w);
+      const i1 = Math.max(i0 + 1, Math.floor(((x + 1) * n) / w));
+
+      let min = 1, max = -1;
+      for (let i = i0; i < i1 && i < n; i++) {
+        const v = timeData[i];
+        if (v < min) min = v;
+        if (v > max) max = v;
       }
+      if (max < min) continue;
 
-      function next_loop() {
-        var i = parseInt(completeEl.innerText, 10);
-        if (isNaN(i)) i = 0;
-        var delays = [300, 200, 100, 50];
-        var delay;
-        if (i < 20) delay = delays[0];
-        else if (i < 60) delay = delays[1];
-        else if (i < 80) delay = delays[2];
-        else delay = delays[3];
+      const yTop = h / 2 - max * amp;
+      const yBot = h / 2 - min * amp;
+      const px = x + 0.5;
+      ctx.moveTo(px, yTop);
+      ctx.lineTo(px, Math.max(yBot, yTop + 1)); // 至少 1px，保持可见
+    }
+    ctx.stroke();
+  }
 
-        if (i >= 100) {
-          return;
-        }
+  /** 主循环 */
+  function loop() {
+    if (!running) return;
 
-        setTimeout(function() {
-          update_complete();
-          next_loop();
-        }, delay);
-      }
-      next_loop();
+    analyser.getFloatTimeDomainData(timeData);
 
-      // ============================================================
-      //  3. 获取 URL 参数中的 code
-      // ============================================================
-      var r = window.location.search.substr(1).match(/(^|&)code=([^&]*)(&|$)/);
-      if (r != null) {
-        document.getElementById('stopcode').innerHTML = r[2];
-      }
+    // ---- 1. 计算 RMS 与 dBFS ----
+    let sum = 0;
+    for (let i = 0; i < timeData.length; i++) {
+      const v = timeData[i];
+      sum += v * v;
+    }
+    const rms = Math.sqrt(sum / timeData.length);
+    const dbfs = 20 * Math.log10(rms + 1e-8);          // 约 -160 ~ 0
+    const level = clamp(dbfs + CAL_OFFSET, 0, 100);    // 映射到 0~100
 
-      // ============================================================
-      //  4. 全屏功能 (默认全屏)
-      // ============================================================
-      function requestFullscreen() {
-        var el = document.documentElement;
-        if (el.requestFullscreen) {
-          el.requestFullscreen().catch(function() {});
-        } else if (el.webkitRequestFullscreen) {
-          el.webkitRequestFullscreen();
-        } else if (el.msRequestFullscreen) {
-          el.msRequestFullscreen();
-        }
-      }
-      document.addEventListener('click', function fullscreenOnClick() {
-        requestFullscreen();
-        document.removeEventListener('click', fullscreenOnClick);
-      }, { once: true });
-      document.addEventListener('touchstart', function fullscreenOnTouch() {
-        requestFullscreen();
-        document.removeEventListener('touchstart', fullscreenOnTouch);
-      }, { once: true });
+    // 指数平滑，让数字不那么跳
+    smoothLevel = smoothLevel > 0 ? smoothLevel * 0.75 + level * 0.25 : level;
 
-      // ============================================================
-      //  5. 点击 "请点击此处重新启动" → 庆祝模式
-      // ============================================================
-      var box = document.getElementById('box');
-      var tx1 = document.getElementById('tx1');
-      var canvas = document.getElementById('confettiCanvas');
-      var ctx = canvas.getContext('2d');
-      var greeting = document.getElementById('greeting');
-      var greetingSub = document.getElementById('greeting-sub');
-      var body = document.body;
+    // ---- 2. 写入 10 秒滑动窗口 ----
+    const now = performance.now();
+    samples.push({ t: now, power: rms * rms, level });
 
-      var isCelebrating = false;
-      var particles = [];
-      var animFrameId = null;
-      var W, H;
+    const cutoff = now - WINDOW_MS;
+    while (samples.length && samples[0].t < cutoff) samples.shift();
 
-      function resizeCanvas() {
-        W = window.innerWidth;
-        H = window.innerHeight;
-        canvas.width = W;
-        canvas.height = H;
-      }
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+    // ---- 3. 窗口内能量平均 + 峰值 ----
+    let powerSum = 0;
+    let peakLevel = 0;
+    for (let i = 0; i < samples.length; i++) {
+      powerSum += samples[i].power;
+      if (samples[i].level > peakLevel) peakLevel = samples[i].level;
+    }
+    const avgRms = Math.sqrt(powerSum / samples.length);
+    const avgLevel = clamp(20 * Math.log10(avgRms + 1e-8) + CAL_OFFSET, 0, 100);
 
-      var COLORS = [
-        '#FF6B6B', '#FF9F43', '#FECA57', '#48DBFB', '#0ABDE3',
-        '#A29BFE', '#FD79A8', '#55EFC4', '#F8A5C2', '#74B9FF',
-        '#FFD93D', '#FF8A5C', '#A8E6CF', '#FFB3B3', '#B8A9C9',
-        '#FFC8A2', '#FF4757', '#2ED573', '#1E90FF', '#FF6348'
-      ];
+    // ---- 4. 更新界面 ----
+    curEl.textContent  = smoothLevel.toFixed(1);
+    avgEl.textContent  = avgLevel.toFixed(1);
+    peakEl.textContent = peakLevel.toFixed(1);
+    dbfsEl.textContent = '原始：' + dbfs.toFixed(1) + ' dBFS';
 
-      function randomColor() {
-        return COLORS[Math.floor(Math.random() * COLORS.length)];
-      }
+    levelFill.style.width = smoothLevel + '%';
+    levelFill.style.background = colorFor(smoothLevel);
 
-      class Particle {
-        constructor(x, y) {
-          this.x = x;
-          this.y = y;
-          var angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.4;
-          var speed = 2.5 + Math.random() * 9;
-          this.vx = Math.cos(angle) * speed * (0.5 + Math.random() * 0.9);
-          this.vy = Math.sin(angle) * speed * (0.7 + Math.random() * 0.7);
-          this.gravity = 0.05 + Math.random() * 0.05;
-          this.drag = 0.99;
-          this.color = randomColor();
-          this.size = 3 + Math.random() * 9;
-          this.life = 1.0;
-          this.decay = 0.003 + Math.random() * 0.007;
-          this.rotation = Math.random() * Math.PI * 2;
-          this.rotSpeed = (Math.random() - 0.5) * 0.12;
-          this.type = Math.random() < 0.4 ? 'ribbon' : 'circle';
-          this.ribbonW = 3 + Math.random() * 7;
-          this.ribbonH = 10 + Math.random() * 22;
-          this.twinkle = Math.random() < 0.35;
-          this.twinkleSpeed = 0.04 + Math.random() * 0.08;
-          this.twinklePhase = Math.random() * Math.PI * 2;
-        }
+    drawWave();
 
-        update() {
-          this.vx *= this.drag;
-          this.vy *= this.drag;
-          this.vy += this.gravity;
-          this.x += this.vx;
-          this.y += this.vy;
-          this.rotation += this.rotSpeed;
-          this.life -= this.decay;
-          if (this.twinkle) {
-            this.twinklePhase += this.twinkleSpeed;
-          }
-          return this.life > 0;
-        }
+    rafId = requestAnimationFrame(loop);
+  }
 
-        draw(ctx) {
-          var alpha = Math.max(0, this.life);
-          var sizeScale = 0.5 + 0.5 * this.life;
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          var twinkleFactor = 1;
-          if (this.twinkle) {
-            twinkleFactor = 0.6 + 0.4 * Math.sin(this.twinklePhase);
-          }
+  /** 开始检测 */
+  async function start() {
+    if (running) return;
 
-          if (this.type === 'ribbon') {
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.rotation);
-            var w = this.ribbonW * sizeScale * twinkleFactor;
-            var h = this.ribbonH * sizeScale * twinkleFactor;
-            ctx.fillStyle = this.color;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 10;
-            var r = w * 0.4;
-            ctx.beginPath();
-            ctx.moveTo(-w / 2 + r, -h / 2);
-            ctx.lineTo(w / 2 - r, -h / 2);
-            ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-            ctx.lineTo(w / 2, h / 2 - r);
-            ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-            ctx.lineTo(-w / 2 + r, h / 2);
-            ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-            ctx.lineTo(-w / 2, -h / 2 + r);
-            ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-            ctx.closePath();
-            ctx.fill();
-          } else {
-            var radius = this.size * sizeScale * twinkleFactor;
-            ctx.shadowColor = this.color;
-            ctx.shadowBlur = 18;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.fill();
-            if (radius > 2.5) {
-              ctx.shadowBlur = 0;
-              ctx.globalAlpha = alpha * 0.5;
-              ctx.beginPath();
-              ctx.arc(this.x - radius * 0.2, this.y - radius * 0.2, radius * 0.3, 0, Math.PI * 2);
-              ctx.fillStyle = '#fff';
-              ctx.fill();
-            }
-          }
-          ctx.restore();
-        }
-      }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      statusEl.textContent = '当前浏览器不支持麦克风采集（需 HTTPS 或 localhost）';
+      return;
+    }
 
-      function emitBurst(count) {
-        var sources = 5 + Math.floor(Math.random() * 3);
-        for (var s = 0; s < sources; s++) {
-          var baseX = (s + 0.5) / sources * W;
-          var x = baseX + (Math.random() - 0.5) * 100;
-          var y = H + 5 + Math.random() * 25;
-          for (var i = 0; i < count / sources; i++) {
-            var p = new Particle(x, y);
-            p.color = randomColor();
-            p.vx += (Math.random() - 0.5) * 3;
-            p.vy -= Math.random() * 2.5;
-            particles.push(p);
-          }
-        }
-      }
+    statusEl.textContent = '正在请求麦克风权限…';
 
-      function emitContinuous() {
-        var count = 2 + Math.floor(Math.random() * 5);
-        for (var i = 0; i < count; i++) {
-          var x = Math.random() * W;
-          var y = H + 5 + Math.random() * 18;
-          var p = new Particle(x, y);
-          p.vx = (Math.random() - 0.5) * 7;
-          p.vy = -3 - Math.random() * 11;
-          p.color = randomColor();
-          if (Math.random() < 0.2) {
-            p.size *= 1.7;
-          }
-          particles.push(p);
-        }
-      }
-
-      function animate() {
-        if (!isCelebrating) return;
-        for (var i = particles.length - 1; i >= 0; i--) {
-          var alive = particles[i].update();
-          if (!alive) {
-            particles.splice(i, 1);
-          }
-        }
-        emitContinuous();
-        ctx.clearRect(0, 0, W, H);
-        for (var i = 0; i < particles.length; i++) {
-          particles[i].draw(ctx);
-        }
-        if (particles.length > 700) {
-          particles.splice(0, particles.length - 700);
-        }
-        animFrameId = requestAnimationFrame(animate);
-      }
-
-      function startCelebration() {
-        if (isCelebrating) return;
-        isCelebrating = true;
-
-        requestFullscreen();
-
-        box.classList.add('hidden');
-        body.classList.add('celebrate');
-        canvas.classList.add('active');
-
-        setTimeout(function() {
-          greeting.classList.add('show');
-          greetingSub.classList.add('show');
-        }, 700);
-
-        setTimeout(function() { emitBurst(45); }, 200);
-        setTimeout(function() { emitBurst(55); }, 600);
-        setTimeout(function() { emitBurst(65); }, 1050);
-
-        animate();
-
-        var burstInterval = setInterval(function() {
-          if (!isCelebrating) {
-            clearInterval(burstInterval);
-            return;
-          }
-          emitBurst(30 + Math.random() * 35);
-        }, 2200);
-        window._burstInterval = burstInterval;
-      }
-
-      tx1.addEventListener('click', function(e) {
-        e.stopPropagation();
-        if (!isCelebrating) {
-          startCelebration();
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,   // 关闭处理，保留原始信号
+          noiseSuppression: false,
+          autoGainControl: false
         }
       });
-      tx1.addEventListener('touchend', function(e) {
-        e.preventDefault();
-        if (!isCelebrating) {
-          startCelebration();
-        }
-      });
+    } catch (err) {
+      statusEl.textContent = '获取麦克风失败：' + (err && err.message ? err.message : err);
+      return;
+    }
 
-      window.addEventListener('resize', function() {
-        resizeCanvas();
-      });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
 
-      window.addEventListener('beforeunload', function() {
-        if (animFrameId) {
-          cancelAnimationFrame(animFrameId);
-        }
-        if (window._burstInterval) {
-          clearInterval(window._burstInterval);
-        }
-      });
+    sourceNode = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = FFT_SIZE;
+    analyser.smoothingTimeConstant = 0;
+    sourceNode.connect(analyser);   // 不连 destination，避免扬声器啸叫
 
-      console.log('🎉 教师节快乐！点击 "请点击此处重新启动" 触发礼炮彩带！');
-    </script>
-  </body>
+    timeData = new Float32Array(analyser.fftSize);
+
+    samples = [];
+    smoothLevel = 0;
+    running = true;
+
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    statusEl.textContent = '检测中…';
+
+    resizeCanvas();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  /** 停止检测 */
+  function stop() {
+    if (!running) return;
+    running = false;
+    cancelAnimationFrame(rafId);
+
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    if (sourceNode) { try { sourceNode.disconnect(); } catch (e) {} sourceNode = null; }
+    if (audioCtx) { try { audioCtx.close(); } catch (e) {} audioCtx = null; }
+
+    analyser = null;
+    timeData = null;
+    samples = [];
+
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    statusEl.textContent = '已停止';
+  }
+
+  startBtn.addEventListener('click', start);
+  stopBtn.addEventListener('click', stop);
+  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('beforeunload', stop);
+
+  // 初始化画布尺寸
+  resizeCanvas();
+})();
+</script>
+</body>
 </html>
