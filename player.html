@@ -223,7 +223,7 @@
   var REPO = "jdprs/jdprs.github.io";
   var BRANCH = "main";
   var DATA_PATH = "videos/data.json";
-  var IS_LOCAL = /[?&]local=1/.test(location.search); // ?local=1 → 本地预览模式（相对路径）
+  var IS_LOCAL = !/[?&]local=0/.test(location.search); // 默认直连 GitHub Pages（相对路径，绕过CDN缓存）；?local=0 可切回CDN模式
   var CDN = IS_LOCAL ? "" : "https://cdn.jsdelivr.net/gh/" + REPO + "@" + BRANCH + "/";
   var RAW = IS_LOCAL ? "" : "https://raw.githubusercontent.com/" + REPO + "/" + BRANCH + "/";
   var API = IS_LOCAL ? "" : "https://api.github.com/repos/" + REPO + "/contents/";
