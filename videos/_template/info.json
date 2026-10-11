@@ -1,0 +1,11 @@
+{
+  "id": "2026-10-11-demo",
+  "title": "示例视频标题",
+  "date": "2026-10-11",
+  "description": "这是 info.json 模板示例。复制本文件夹为模板，替换成你自己的视频内容即可（文件放同目录，字段含义见 videos/需要什么文件.txt）。",
+  "tags": ["示例", "模板"],
+  "duration": "00:00",
+  "cover": "cover.png",
+  "file": "video.mp4",
+  "featured": false
+}

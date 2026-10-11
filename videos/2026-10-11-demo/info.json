@@ -1,0 +1,11 @@
+{
+  "id": "2026-10-11-demo",
+  "title": "示例视频 · 欢迎来到我的主页 🎉",
+  "date": "2026-10-11",
+  "description": "这是一个示例视频，用于演示主页视频播放器的完整工作流程。直接删除本文件夹（并在 videos/data.json 中移除对应记录）即可移除。添加你自己的视频方法见 videos/需要什么文件.txt。",
+  "tags": ["示例", "欢迎"],
+  "duration": "00:06",
+  "cover": "cover.png",
+  "file": "video.mp4",
+  "featured": true
+}

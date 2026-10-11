@@ -1,129 +1,316 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI安全与全球治理 · 下载</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>jdprs · 个人主页</title>
 <style>
   :root {
-    --bg: #0f1117;
-    --panel: #171a23;
-    --line: #262b38;
-    --text: #e6e9ef;
-    --muted: #8b93a7;
-    --accent: #2fd07c;
+    --bg: #ffffff;
+    --text: #18181b;
+    --muted: #71717a;
+    --line: #e4e4e7;
+    --accent: #2563eb;
+    --accent-soft: rgba(37, 99, 235, .08);
+    --radius: 14px;
   }
-  * { box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(900px 500px at 50% -10%, #1c2231, #0f1117 60%);
-    color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                 "PingFang SC", "Microsoft YaHei", sans-serif;
-    padding: 24px 16px;
-  }
-  .card {
-    width: 100%;
-    max-width: 460px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 32px 28px;
-    text-align: center;
-  }
-  .icon { font-size: 40px; margin-bottom: 10px; }
-  h1 { font-size: 19px; font-weight: 600; margin: 0 0 6px; letter-spacing: .5px; }
-  .sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .meta { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 13px 20px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    text-align: center;
-    text-decoration: none;
-    background: linear-gradient(180deg, #2fd07c, #22b76a);
-    color: #06210f;
-    transition: .15s;
-    margin-bottom: 12px;
-    border: none;
-    cursor: pointer;
-  }
-  .btn:hover { filter: brightness(1.08); }
-  .btn.secondary {
-    background: transparent;
-    border: 1px solid var(--line);
+                 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
     color: var(--text);
-    font-weight: 500;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  .notice {
-    font-size: 12px;
-    line-height: 1.8;
-    color: var(--muted);
-    border-top: 1px solid var(--line);
-    padding-top: 14px;
-    margin-top: 6px;
-    text-align: left;
-    display: none;
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 22px; }
+
+  /* ---------- 顶部 ---------- */
+  .hero { text-align: center; padding: 72px 0 40px; }
+  .avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    border: 3px solid #fff; box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+    opacity: 0; transform: translateY(12px);
+    animation: rise .7s ease forwards;
   }
-  .notice code {
-    background: #1e2330;
-    padding: 1px 6px;
-    border-radius: 6px;
-    font-size: 11px;
+  .hero h1 {
+    font-size: 40px; font-weight: 800; letter-spacing: 1px;
+    opacity: 0; transform: translateY(12px);
+    animation: rise .7s .1s ease forwards;
   }
+  .hero h1 .dot { color: var(--accent); }
+  .tagline {
+    margin-top: 10px; color: var(--muted); font-size: 16px;
+    opacity: 0; transform: translateY(12px);
+    animation: rise .7s .2s ease forwards;
+  }
+  .hero-links { margin-top: 18px; font-size: 14px; opacity: 0; animation: rise .7s .3s ease forwards; }
+  .hero-links a { margin: 0 10px; }
+  .stats {
+    display: flex; justify-content: center; gap: 34px; margin-top: 26px;
+    opacity: 0; animation: rise .7s .4s ease forwards;
+  }
+  .stat { text-align: center; }
+  .stat b { display: block; font-size: 22px; font-weight: 700; }
+  .stat span { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- 区块 ---------- */
+  section { padding: 26px 0; }
+  .sec-head {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 700; letter-spacing: 3px;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .sec-head::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+  }
+
+  /* ---------- 关于 ---------- */
+  .about-list { list-style: none; }
+  .about-list li {
+    display: flex; gap: 10px; padding: 9px 0;
+    border-bottom: 1px dashed var(--line); font-size: 15px;
+  }
+  .about-list li:last-child { border-bottom: none; }
+  .about-list .ico { color: var(--accent); }
+
+  /* ---------- 仓库 ---------- */
+  .repos-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .repo {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; background: #fff;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    opacity: 0; animation: rise .5s ease forwards;
+  }
+  .repo:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37,99,235,.4);
+    box-shadow: 0 12px 28px rgba(0,0,0,.07);
+  }
+  .repo .r-name { font-size: 15px; font-weight: 700; word-break: break-all; }
+  .repo .r-name a { color: var(--text); }
+  .repo:hover .r-name a { color: var(--accent); text-decoration: none; }
+  .repo .r-desc { font-size: 13px; color: var(--muted); margin-top: 5px; min-height: 20px; }
+  .repo .r-meta {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 12px; color: var(--muted); margin-top: 12px; flex-wrap: wrap;
+  }
+  .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: -1px; }
+  .r-meta a { color: var(--muted); }
+  .r-meta a:hover { color: var(--accent); text-decoration: none; }
+  .pages-badge {
+    font-size: 11px; color: #047857; background: #ecfdf5;
+    border: 1px solid #a7f3d0; border-radius: 999px; padding: 1px 8px;
+  }
+  .repos-loading, .repos-error { color: var(--muted); font-size: 14px; padding: 20px 0; }
+  .repos-error a { text-decoration: underline; }
+
+  /* ---------- 视频 ---------- */
+  .video-card {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px 22px; background: linear-gradient(180deg, #fff, #fafafa);
+    transition: border-color .2s ease;
+  }
+  .video-card:hover { border-color: rgba(37,99,235,.4); }
+  .video-card .v-ico {
+    width: 52px; height: 52px; border-radius: 14px; flex: 0 0 52px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .video-card h3 { font-size: 16px; font-weight: 700; }
+  .video-card p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .video-card .v-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-block; padding: 9px 18px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; color: #fff; background: var(--accent);
+    transition: filter .15s ease, transform .15s ease;
+  }
+  .btn:hover { filter: brightness(1.08); transform: translateY(-1px); text-decoration: none; }
+  .btn.ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--line); font-weight: 500;
+  }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- 页脚 ---------- */
+  footer {
+    margin-top: 30px; padding: 34px 0 44px;
+    border-top: 1px solid var(--line); text-align: center;
+    color: var(--muted); font-size: 13px;
+  }
+  footer .f-links { margin-bottom: 10px; }
+  footer .f-links a { margin: 0 12px; }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="icon">📄</div>
-  <h1>AI安全与全球治理</h1>
-  <div class="sub">演示文稿 · PowerPoint 幻灯片</div>
-  <div class="meta">文件名：AI安全与全球治理.pptx　·　大小：2.3 MB</div>
-  <a class="btn" id="dlBtn" href="AI安全与全球治理.pptx" download="AI安全与全球治理.pptx">立即下载 PPTX</a>
-  <a class="btn secondary" id="tmpBtn" style="display:none" href="https://aka.doubaocdn.com/s/Nic46IZRKG" target="_blank" rel="noopener">临时下载通道（约一周内有效）</a>
-  <div class="notice" id="notice"></div>
-</div>
-<script>
-(() => {
-  'use strict';
-  const FILE = 'AI安全与全球治理.pptx';
-  const dlBtn = document.getElementById('dlBtn');
-  const tmpBtn = document.getElementById('tmpBtn');
-  const notice = document.getElementById('notice');
 
-  function missing() {
-    dlBtn.textContent = '文件尚未就绪';
-    dlBtn.removeAttribute('download');
-    dlBtn.style.pointerEvents = 'none';
-    dlBtn.style.opacity = '.5';
-    tmpBtn.style.display = 'block';
-    notice.style.display = 'block';
-    notice.innerHTML =
-      '仓库中还没有 <code>AI安全与全球治理.pptx</code>。' +
-      '请登录 GitHub，进入 <code>jdprs/jdprs.github.io</code> 仓库，' +
-      '把该文件拖拽上传到根目录，然后刷新本页即可永久下载。' +
-      '（上传前可先使用下方的临时通道）';
+<header class="hero">
+  <img class="avatar" id="avatar" alt="jdprs" src="https://avatars.githubusercontent.com/u/318268758?v=4"/>
+  <h1>jdprs<span class="dot">.</span></h1>
+  <p class="tagline">独立游戏开发者 &amp; 前端玩家 · 用 HTML / CSS / JS 造好玩的东西</p>
+  <p class="hero-links">
+    <a href="https://github.com/jdprs" target="_blank" rel="noopener">GitHub</a>
+    <a href="player.html">🎬 视频</a>
+    <a href="#repos">公开仓库</a>
+    <a href="#about">关于</a>
+  </p>
+  <div class="stats" id="stats">
+    <div class="stat"><b id="stRepos">–</b><span>公开仓库</span></div>
+    <div class="stat"><b id="stStars">–</b><span>Star 总数</span></div>
+    <div class="stat"><b id="stFollow">–</b><span>关注者</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="about">
+    <div class="sec-head">关于</div>
+    <ul class="about-list">
+      <li><span class="ico">▸</span><span><b>正在做</b>：原创游戏《XFW》（xfw-net）</span></li>
+      <li><span class="ico">▸</span><span><b>折腾中</b>：前端可视化 · 游戏开发 · 创意小工具</span></li>
+      <li><span class="ico">▸</span><span><b>喜欢</b>：把想法变成能玩、能看、能用的东西</span></li>
+    </ul>
+  </section>
+
+  <section id="repos">
+    <div class="sec-head">公开仓库 &amp; Pages</div>
+    <div class="repos-grid" id="reposGrid">
+      <div class="repos-loading">正在加载仓库…</div>
+    </div>
+  </section>
+
+  <section id="video">
+    <div class="sec-head">视频</div>
+    <div class="video-card">
+      <div class="v-ico">🎬</div>
+      <div>
+        <h3>我的视频播放器</h3>
+        <p id="videoDesc">视频存放在本仓库 videos/ 文件夹，由 player.html 统一读取播放。</p>
+      </div>
+      <div class="v-actions">
+        <a class="btn" href="player.html">打开播放器</a>
+        <a class="btn ghost" href="videos/%E9%9C%80%E8%A6%81%E4%BB%80%E4%B9%88%E6%96%87%E4%BB%B6.txt" target="_blank" rel="noopener">素材说明</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="f-links">
+    <a href="AI安全与全球治理.pptx" download>📄 下载《AI安全与全球治理》PPT</a>
+    <a href="https://github.com/jdprs/jdprs.github.io" target="_blank" rel="noopener">仓库源码</a>
+  </div>
+  <div>© 2026 jdprs · 简约白底 · Made with HTML/CSS/JS</div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // 已知可访问的 GitHub Pages 站点（其余仓库仅给 GitHub 链接）
+  var LIVE_PAGES = { "jdprs.github.io": 1, "macos-clone": 1, "xfw-net": 1, "jmind": 1 };
+  var PAGES_BASE = "https://jdprs.github.io/";
+  var API_REPOS = "https://api.github.com/users/jdprs/repos?sort=updated&per_page=100&type=owner";
+
+  // 兜底数据（接口限流/失败时展示，保证页面不空）
+  var FALLBACK = [
+    { name: "xfw-net", description: "原创游戏《XFW》最新版仓库", language: "JavaScript", stargazers_count: 1, updated_at: "2026-10-07" },
+    { name: "macos-clone", description: "用 HTML+CSS+JS 高保真复刻 macOS 桌面，无框架", language: "JavaScript", stargazers_count: 0, updated_at: "2026-09-25" },
+    { name: "jmind", description: "本地优先的在线思维导图：拖拽、撤销重做、导出 PNG", language: "JavaScript", stargazers_count: 0, updated_at: "2026-09-10" },
+    { name: "xfw-cli", description: "小富翁股票投资游戏 · 纯终端 CLI 版（零依赖）", language: "JavaScript", stargazers_count: 0, updated_at: "2026-09-19" },
+    { name: "jdprs.github.io", description: "本个人主页站点", language: "HTML", stargazers_count: 0, updated_at: "2026-09-27" }
+  ];
+
+  var LANG_COLORS = { "JavaScript": "#f1e05a", "HTML": "#e34c26", "CSS": "#563d7c", "TypeScript": "#3178c6", "Python": "#3572A5", "Shell": "#89e051" };
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
   }
 
-  (async () => {
-    try {
-      const res = await fetch(FILE, { method: 'HEAD', cache: 'no-store' });
-      if (res.ok) {
-        window.location.href = FILE;
-      } else {
-        missing();
+  function dateStr(d) {
+    var s = String(d || "").slice(0, 10);
+    return s || "—";
+  }
+
+  function pagesUrl(name) {
+    return name === "jdprs.github.io" ? PAGES_BASE : PAGES_BASE + name + "/";
+  }
+
+  function repoCard(r, i) {
+    var lang = r.language || "";
+    var dot = lang ? '<span class="lang-dot" style="background:' + (LANG_COLORS[lang] || "#8b949e") + '"></span>' + esc(lang) : "未标注语言";
+    var pages = LIVE_PAGES[r.name]
+      ? '<a class="pages-badge" href="' + pagesUrl(r.name) + '" target="_blank" rel="noopener">🌐 Pages</a>'
+      : "";
+    return (
+      '<div class="repo" style="animation-delay:' + Math.min(i * 60, 480) + 'ms">' +
+        '<div class="r-name"><a href="https://github.com/jdprs/' + esc(r.name) + '" target="_blank" rel="noopener">' + esc(r.name) + "</a></div>" +
+        '<div class="r-desc">' + (esc(r.description) || "暂无简介") + "</div>" +
+        '<div class="r-meta">' +
+          "<span>" + dot + "</span>" +
+          '<span>★ ' + (r.stargazers_count || 0) + "</span>" +
+          "<span>更新 " + dateStr(r.updated_at) + "</span>" +
+          pages +
+        "</div>" +
+      "</div>"
+    );
+  }
+
+  function renderRepos(list) {
+    var grid = document.getElementById("reposGrid");
+    var owned = list.filter(function (r) { return !r.fork; });
+    if (!owned.length) owned = list;
+    grid.innerHTML = owned.map(repoCard).join("");
+  }
+
+  // 仓库加载：GitHub API → 失败用兜底数据
+  fetch(API_REPOS)
+    .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+    .then(function (data) {
+      renderRepos(data);
+      var stars = data.reduce(function (s, r) { return s + (r.stargazers_count || 0); }, 0);
+      var reps = data.filter(function (r) { return !r.fork; }).length;
+      setStats(reps, stars, data.length);
+    })
+    .catch(function () {
+      renderRepos(FALLBACK);
+      setStats(FALLBACK.length, 1, 0);
+      var grid = document.getElementById("reposGrid");
+      var tip = document.createElement("div");
+      tip.className = "repos-error";
+      tip.innerHTML = "⚠️ 实时数据加载失败（GitHub API 限流），以上为缓存列表。";
+      grid.appendChild(tip);
+    });
+
+  function setStats(repos, stars, followers) {
+    document.getElementById("stRepos").textContent = repos || "–";
+    document.getElementById("stStars").textContent = stars || "–";
+    document.getElementById("stFollow").textContent = (followers == null ? "–" : followers);
+  }
+
+  // 视频数量（读 videos/data.json，经 jsDelivr CDN，失败静默）
+  fetch("https://cdn.jsdelivr.net/gh/jdprs/jdprs.github.io@main/videos/data.json")
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var n = (d && Array.isArray(d.videos)) ? d.videos.length : 0;
+      if (n > 0) {
+        document.getElementById("videoDesc").textContent = "共 " + n + " 个视频，存放在本仓库 videos/ 文件夹，由 player.html 统一读取播放。";
       }
-    } catch (e) {
-      // 网络异常时保留主按钮，不做降级处理
-    }
-  })();
+    })
+    .catch(function () { /* 保持默认文案 */ });
 })();
 </script>
 </body>
