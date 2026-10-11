@@ -255,7 +255,7 @@
   function loadData() {
     setLoading(true);
     var sources = [
-      CDN + DATA_PATH,
+      CDN + DATA_PATH + "?t=" + Date.now(),
       API + encodeURIComponent(DATA_PATH) + "?ref=" + BRANCH + "&t=" + Date.now()
     ];
     fetchJson(sources).then(function (raw) {
@@ -278,7 +278,7 @@
   function loadInfo(item) {
     var folder = String(item.folder || "").trim();
     if (!folder) return Promise.resolve(null);
-    var infoUrl = CDN + "videos/" + encodeURIComponent(folder) + "/info.json";
+    var infoUrl = CDN + "videos/" + encodeURIComponent(folder) + "/info.json?t=" + Date.now();
     var apiUrl = API + "videos/" + encodeURIComponent(folder) + "/info.json?ref=" + BRANCH;
     return fetchJson([infoUrl, apiUrl]).then(function (raw) {
       var info = raw.content ? JSON.parse(decodeBase64(raw.content)) : raw;
